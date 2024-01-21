@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FractalPlot</title>
+  <link rel="stylesheet" href="styles.css"  />
+</head>
+<body class="contain"> 
+  <script type="module" src="main.js"></script>
+    <div class="mainRender"> 
+      <canvas id="canvas"></canvas>
+    </div>
+    <div class="adjustBox">
+      <img src="juliaplotimg.png" alt="image" id="img"> 
+
+      <div id="equation" class="equation"> <b> W = z^2 + (0.0 + 0.0i) </b> </div>
+      
+      <label for="power-slider">Value of the power : </label>
+      <input type="range" name="power-slider" value="0" id="power-slider" step="1" min="2" max="8" onchange="updateFormula()">
+
+      <label for="c-real-slider">Real part of the complex number : </label>
+      <input type="range" name="c-real-slider" value="0" id="c-real-slider" step="0.0001" min="0" max="2" onchange="updateFormula()">
+
+      <label for="c-imaginary-slider">Imaginary part of the complex number : </label>
+      <input type="range" name="c-imaginary-slider" value="0" id="c-imaginary-slider" step="0.0001" min="0" max="2" onchange="updateFormula()">
+
+      <button>Save Image</button>
+    </div>
+    <script>
+      // for updating the equation based on the present slider values
+      // also need to render again
+      function updateFormula() {
+          const power = document.getElementById("power-slider").value;
+          const real = document.getElementById("c-real-slider").value;
+          const imagine = document.getElementById("c-imaginary-slider").value;
+
+          var eqn = document.getElementById("equation");
+          eqn.innerText = `W = z^${power} + (${real} + ${imagine}i)`;
+      }
+    </script>
+</body>
+</html>
+
