@@ -67,22 +67,28 @@ input[type="range"] {
 }
 
 button {
+    border: none;
     border-radius: 5px;
     width: 90%;
     height: 40px;
     font-size: large;
     font-family: Georgia, 'Times New Roman', Times, serif;
     background-color: rgb(75, 75, 75);
-    box-shadow: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 button:hover {
-    transition: 0.5s;
-    box-shadow: 0px;
+    transition: 250ms;
+    box-shadow: 0 0 0 0;
 }
 
-button :active {
-    transition: 0.2s;
-    box-shadow: 0px;
+button:active {
+    transition: 50ms;
+    box-shadow: 0 0 0 0;
+    background-color: rgb(165, 165, 165);
+    color: brown;
 }
+
+
+
   

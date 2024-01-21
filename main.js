@@ -2,12 +2,16 @@
 const canvas = document.querySelector('canvas');
 const gl_object = canvas.getContext('webgl');
 
+
+const info = document.getElementById("info");
 if (!gl_object) {
+    info.innerText = "WebGL Not Supported, Please use a different browser";
     throw new Error("Couldn't initiate the WebGL functionality, please use a different browser");
 }
 
 var CanvasHtml = document.getElementsByClassName("mainRender");
 
+info.innerText = "WebGL Supported, Rendering";
 
 // // for mouse hold and slide.
 // canvas.addEventListener() {
