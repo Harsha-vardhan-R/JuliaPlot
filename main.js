@@ -23,6 +23,44 @@ info.innerText = "WebGL Supported, Rendering";
 
 // }
 
+// ########### 
+// managing the 2d-slider.
+const dslider = document.getElementById("d-slider");
+var isMouseDragging = false;
+
+function handleSliderMove(e) {
+    if (isMouseDragging) {
+        const x = e.clientX;
+        const y = e.clientY;
+    
+        // Update the slider position based on mouse coordinates
+        const parentRect = document.getElementById("vector-pad");
+        const rect = parentRect.getBoundingClientRect();
+
+        const updateX = x - rect.top;
+        const updateY = y - rect.left;
+
+        dslider.style.left = `${x}px`;
+        dslider.style.top = `${y}px`;
+    }
+}
+
+dslider.addEventListener( 'mousedown' , (e) => {
+    isMouseDragging = true;
+    
+    document.addEventListener('mousemove', handleSliderMove);
+    document.addEventListener('mouseup', () => {
+    isMouseDragging = false;
+    document.removeEventListener('mousemove', handleSliderMove);
+    });
+
+    e.preventDefault();
+});
+
+document.addEventListener('mouseleave', () => {
+    isMouseDragging = false;
+    document.removeEventListener('mousemove', handleSliderMove);
+});
 
 
 
@@ -95,7 +133,11 @@ function draw() {
     // Clear the canvas
     gl_object.clearColor(0.0, 0.0, 0.0, 1.0);
     gl_object.clear(gl_object.COLOR_BUFFER_BIT);
-    gl_object.viewport(0, 0, canvas.height, canvas.width);
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    gl_object.viewport(0, 0, canvas.width, canvas.height);
 
 
     // Draw the square

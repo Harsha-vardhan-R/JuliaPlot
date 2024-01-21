@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FractalPlot</title>
+  <title>JuliaPlot</title>
   <link rel="stylesheet" href="styles.css"  />
 </head>
 <body class="contain"> 
@@ -19,6 +19,10 @@
       <label for="power-slider">Value of the power : </label>
       <input type="range" name="power-slider" value="0" id="power-slider" step="1" min="2" max="8" onchange="updateFormula()">
 
+      <div id="vector-pad" class="vector-pad">
+        <div id="d-slider" class="d-slider"></div>
+      </div>
+
       <label for="c-real-slider">Real part of the complex number : </label>
       <input type="range" name="c-real-slider" value="0" id="c-real-slider" step="0.0001" min="0" max="2" onchange="updateFormula()">
 
@@ -30,7 +34,7 @@
       <div id="Time">Time taken for last render : 0</div>
 
       <div id="info"></div>
-      
+
     </div>
     <script>
       // for updating the equation based on the present slider values
@@ -41,7 +45,7 @@
           const imagine = document.getElementById("c-imaginary-slider").value;
 
           var eqn = document.getElementById("equation");
-          eqn.innerText = `W = z^${power} + (${real} + ${imagine}i)`;
+          eqn.innerText = `W = z${power} + (${real} + ${imagine}i)`;
       }
     </script>
 </body>
