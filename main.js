@@ -15,15 +15,48 @@ var CanvasHtml = document.getElementsByClassName("mainRender");
 
 info.innerText = "WebGL Supported, Rendering";
 
-// // for mouse hold and slide.
-// canvas.addEventListener() {
 
-// }
+var init_center_x = 0.0;
+var init_center_y = 0.0;
+var init_range = 1.5;
+
+var init_mouse_x, init_mouse_y;
+
+let isDragging = false;
+let initMouseX, initMouseY;
+
+canvas.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    initMouseX = e.clientX;
+    initMouseY = e.clientY;
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+});
+
+canvas.addEventListener('mouseup', () => {
+    isDragging = false;
+    canvas.removeEventListener('mousemove', handleMouseMove);
+});
+
+function handleMouseMove(e) {
+    if (isDragging) {
+        const deltaX = ((e.clientX - initMouseX) / canvas.width) * 2.0*init_range;
+        const deltaY = ((e.clientY - initMouseY) / canvas.height) * 2.0*init_range;
+
+        init_center_x -= deltaX;
+        init_center_y += deltaY;
+
+        initMouseX = e.clientX;
+        initMouseY = e.clientY;
+    }
+}
 
 // // for mouse scroll.
-// canvas.addEventListener() {
-
-// }
+canvas.addEventListener('wheel' , e => {
+  const delta = Math.sign(e.deltaY);
+  console.log(delta);
+  init_range = init_range*(1.0+(0.1*delta));
+});
 
 // ########### 
 // managing the 2d-slider.
@@ -57,7 +90,6 @@ function handleSliderMove(e) {
 
         updateFormulaFromPad();
     }
-    sleep(100);
 }
 
 dslider.addEventListener( 'mousedown' , (e) => {
@@ -165,37 +197,64 @@ if (!gl_object.getShaderParameter(vertexShader, gl_object.COMPILE_STATUS)) {
 
 // the fragment shader that caculates the color value for each pixel.
 const fragmentShaderSource = `
-
 precision mediump float;
 uniform vec2 resolution;
 uniform vec2 constant;
 uniform vec2 corner;
 uniform float range;
 uniform int max_iter;
+uniform int power;
+uniform float hue;
 varying vec2 coords;
 
+float value = 1.0;
+
+float trapCircle(vec2 point, vec2 center, float radius) {
+    return length(point - center) - radius;
+}
+
+vec3 hsv2rgb(vec3 c) {
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
 void main(void) {
-  vec2 z = (coords * range + corner);
-  vec2 c = constant;
-  vec2 newZ;
-  int num;
+    vec2 z = (coords * range + corner);
+    vec2 c = constant;
+    vec2 newZ;
+    int num;
+
+    for (int iterations = 0; iterations < 9000; iterations++) {
+      if (iterations >= max_iter) break;
+      if (dot(z, z) > 4.0) break;
+
+      for (int pow = 2; pow < 10; pow++) {
+
+        newZ.x = z.x * z.x - z.y * z.y + c.x;
+        newZ.y = 2.0 * z.x * z.y + c.y;
+        z = newZ;
   
+        if ( pow >= power ) break;
+      }
 
-  for (int iterations = 0; iterations < 9000; iterations++) {
+      num = iterations;
+    } 
 
-    if (iterations >= max_iter) break;
+    float trapDistance = trapCircle(z, vec2(0.0), 0.1);
 
-    if (dot(z, z) > 4.0) break;
+    float normalizedIterations = float(num) / float(max_iter);
 
-    newZ.x = z.x * z.x - z.y * z.y + c.x;
-    newZ.y = 2.0 * z.x * z.y + c.y;
-    z = newZ;
-    num = iterations;
-  }
+    if ((num+15) >= max_iter ) {
+      value = 0.0;
+    }
+    
+    vec3 color = hsv2rgb(vec3(normalizedIterations+hue, 1.0-(normalizedIterations/2.0), value)) * smoothstep(0.0, 0.02, trapDistance);
 
-  float normalizedIterations = float(num) / float(max_iter);
-  gl_FragColor = vec4(vec3(normalizedIterations), 1.0);
-}`;
+    
+    gl_FragColor = vec4(color, 1.0);
+}
+`;
 
 const fragmentShader = gl_object.createShader(gl_object.FRAGMENT_SHADER);
 gl_object.shaderSource(fragmentShader, fragmentShaderSource);
@@ -212,7 +271,7 @@ gl_object.linkProgram(shaderProgram);
 gl_object.useProgram(shaderProgram);
 
 
-// we want the coordinates of the 
+// we want the location of the coordinates.
 const coord = gl_object.getAttribLocation(shaderProgram, 'coordinates');
 gl_object.vertexAttribPointer(coord, 2, gl_object.FLOAT, false, 0, 0);
 gl_object.enableVertexAttribArray(coord);
@@ -223,40 +282,59 @@ const constantLocation = gl_object.getUniformLocation(shaderProgram, "constant")
 const cornerLocation = gl_object.getUniformLocation(shaderProgram, "corner");
 const rangeLocation = gl_object.getUniformLocation(shaderProgram, "range");
 const maxIterLocation = gl_object.getUniformLocation(shaderProgram, "max_iter");
+const powerLocation = gl_object.getUniformLocation(shaderProgram, "power");
+const hueLocation = gl_object.getUniformLocation(shaderProgram, "hue");
 
 const iterations = document.getElementById("iteration-slider");
 const power = document.getElementById("power-slider");
+const timetime = document.getElementById("timetime");
+const hue = document.getElementById("hue-slider");
 
+var start_time;
 
+var capture = false;
+
+// main drawing loop.
 function draw() {
+    start_time = performance.now();
+
     // Clear the canvas
     gl_object.clearColor(0.0, 0.0, 0.0, 1.0);
     gl_object.clear(gl_object.COLOR_BUFFER_BIT);
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = 1500;
+    canvas.height = 1500;
 
     gl_object.viewport(0, 0, canvas.width, canvas.height);
 
-    renderImage( -2.0, -2.0, 4.0, iterations.value, power, real_slider.value, imagine_slider.value);
+    renderImage( init_center_x, init_center_y, init_range, iterations.value, power.value, real_slider.value, imagine_slider.value, hue.value);
 
 
-    // Draw the square
+    // two triangles!!
     gl_object.drawArrays(gl_object.TRIANGLE_STRIP, 0, vertices.length / 2);
 
-    // Request the next frame
+    if (capture ) {
+      capture = false;
+      const dataUrl = canvas.toDataURL(); 
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `fractal_image-${init_range}.png`; 
+      link.click();
+    }
     
     updateFormula();
     newOne();
+
+    timetime.innerText = `${performance.now() - start_time} ms`;
     
     requestAnimationFrame(draw);
 }
 
-  // Start the rendering loop
+// Start the rendering loop
 draw();
 
-
-function renderImage(coord_x, coord_y, range, max_iterations, power, c_real, c_imagine) {
+// for setting of the image to render.
+function renderImage(coord_x, coord_y, range, max_iterations, power, c_real, c_imagine, hue) {
   // get the dimensions of the canvas.
   const height = canvas.offsetHeight;
   const width = canvas.offsetWidth;
@@ -266,6 +344,8 @@ function renderImage(coord_x, coord_y, range, max_iterations, power, c_real, c_i
   gl_object.uniform2f(cornerLocation, coord_x, coord_y);
   gl_object.uniform1f(rangeLocation, range);
   gl_object.uniform1i(maxIterLocation, max_iterations);
+  gl_object.uniform1i(powerLocation, power);
+  gl_object.uniform1f(hueLocation, hue);
 
 }
 
@@ -282,4 +362,4 @@ function updateFormula() {
     eqn.innerText = `W = z^${power} + (${real} + ${imagine}i)`;
 }
 
-
+document.getElementById('downloadButton').addEventListener('click', () => {capture = true});

@@ -38,21 +38,16 @@
   
       </div>
 
+      <label for="hue-slider" id="hue">Hue : </label>
+      <input type="range" name="hue-slider" value="0" id="hue-slider" step="0.01" min="0.0" max="1.0" >
 
-      <label for="iteration-slider" id="iterations">Maximum Number of Iterations : 255</label>
-      <input type="range" name="iteration-slider" value="0" id="iteration-slider" step="100" min="255" max="8191" onchange="updateIter()" onmousedown="newOne()">
+      <label for="iteration-slider" id="iterations">Maximum Number of Iterations : 32</label>
+      <input type="range" name="iteration-slider" value="0" id="iteration-slider" step="10" min="32" max="2500" onchange="updateIter()" onmousedown="newOne()">
 
-      <label for="resolution">Select Resolution :</label>
-      <select name="resolution" id="resolution">
-        <option value="1000">1000*1000</option>
-        <option value="2000">2000*2000</option>
-        <option value="3000">3000*3000</option>
-        <option value="4000">4000*4000</option>
-        <option value="5000">5000*5000</option>
-      </select>
-      <button>Save Image</button>
 
-      <div id="Time">Time taken for last render : 0</div>
+      <button id="downloadButton">Save Image</button>
+
+      <div id="Time">Time taken for last render : <div id="timetime"></div></div>
 
       <div id="info"></div>
 
@@ -76,6 +71,20 @@
 
           var eqn = document.getElementById("iterations");
           eqn.innerText = `Maximum Number of Iterations : ${value}`;
+      }
+
+      function newOne() {
+        const dslider = document.getElementById("d-slider");
+        const containerRect = document.getElementById("vector-pad");
+
+        const real = parseFloat(document.getElementById("c-real-slider").value);
+        const imagine = parseFloat(document.getElementById("c-imaginary-slider").value);
+                
+        const newX = containerRect.offsetWidth*((real+2.01)/4.22);
+        const newY = containerRect.offsetHeight*(1 - (imagine + 2.2) / 4.2);
+
+        dslider.style.left = `${newX}px`;
+        dslider.style.top = `${newY}px`;
       }
     </script>
 </body>

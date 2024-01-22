@@ -1,26 +1,35 @@
 .contain {
+    aspect-ratio: 1/1;
     margin: 0;
     padding: 0;
     height: 100vh;
     width: 100%;
-    justify-content: space-between;
+    justify-content: center;
     display: flex;
     background-color: black;
 }
 
 canvas { 
+    aspect-ratio: 1/1;
     display: block;
     width: 100%;
-    height: 100%;
+}
+
+canvas:hover {
+    cursor: grab;
+}
+
+canvas:active {
+    cursor: grabbing;
 }
 
 .mainRender {
+    aspect-ratio: 1/1;
     position: relative;
-    align-self:baseline;
+    align-self:center;
     margin: 4vh;
     background-color: white;
-    height: 92%; 
-    width: 75%;
+    height: 92%;
     border-radius: 5px;
     border : 1px solid white;
     resize: none;
@@ -107,6 +116,12 @@ canvas {
     height: 1px;
     width: 100%;
     rotate: 90deg;    
+}
+
+#hue-slider {
+    width: 90%;
+    height: 10px;
+    margin-bottom: 20px;
 }
 
 .vector-pad {
