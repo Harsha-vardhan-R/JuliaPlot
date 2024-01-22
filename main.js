@@ -26,22 +26,34 @@ info.innerText = "WebGL Supported, Rendering";
 // ########### 
 // managing the 2d-slider.
 const dslider = document.getElementById("d-slider");
+const pad = document.getElementById("vector-pad");
+const real_slider = document.getElementById("c-real-slider");
+const imagine_slider = document.getElementById("c-imaginary-slider");
 var isMouseDragging = false;
+
+// at the start of loading.
+dslider.style.left = `48%`;
+dslider.style.top = `48%`;
+
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 function handleSliderMove(e) {
     if (isMouseDragging) {
         const x = e.clientX;
         const y = e.clientY;
-    
+
         // Update the slider position based on mouse coordinates
         const parentRect = document.getElementById("vector-pad");
         const rect = parentRect.getBoundingClientRect();
 
-        const updateX = x - rect.top;
-        const updateY = y - rect.left;
+        const updateX = clamp(x - rect.left, 0, pad.offsetHeight-17);
+        const updateY = clamp(y - rect.top, 0, pad.offsetWidth-17);
 
-        dslider.style.left = `${x}px`;
-        dslider.style.top = `${y}px`;
+
+        dslider.style.left = `${updateX}px`;
+        dslider.style.top = `${updateY}px`;
+
+        updateFormulaFromPad();
     }
 }
 
@@ -61,6 +73,50 @@ document.addEventListener('mouseleave', () => {
     isMouseDragging = false;
     document.removeEventListener('mousemove', handleSliderMove);
 });
+
+function toFixed(value, precision) {
+  var power = Math.pow(10, precision || 0);
+  return String(Math.round(value * power) / power);
+}
+
+// for updating the equation based on the present slider values
+// also need to render again
+function updateFormulaFromPad() {
+  const power = document.getElementById("power-slider").value;
+
+  const sliderRect = dslider.getBoundingClientRect();
+  const containerRect = dslider.parentElement.getBoundingClientRect();
+
+  const relativeX = (sliderRect.left - containerRect.left) / containerRect.width;
+  const relativeY = (sliderRect.top - containerRect.top) / containerRect.height;
+
+  // Calculate real and imaginary, based on the relative position
+  const real = (relativeX * 4.24) - 2.0;
+  const imagine = -((relativeY * 4.24) - 2.0); // Negating because y-axis is inverted in HTML
+
+  // Round to 4 decimal places
+  const roundedReal = Math.round(real * 10000) / 10000;
+  const roundedImagine = Math.round(imagine * 10000) / 10000;
+
+  var eqn = document.getElementById("equation");
+  real_slider.value = roundedReal;
+  imagine_slider.value = roundedImagine;
+  
+  eqn.innerText = `W = z^${power} + (${roundedReal} + ${roundedImagine}i)`;
+}
+
+function newOne() {
+  const containerRect = document.getElementById("vector-pad");
+
+  const real = parseFloat(document.getElementById("c-real-slider").value);
+  const imagine = parseFloat(document.getElementById("c-imaginary-slider").value);
+          
+  const newX = containerRect.offsetWidth*((real+2.0)/4.24);
+  const newY = containerRect.offsetHeight*(1 - (imagine + 2.2) / 4.2);
+
+  dslider.style.left = `${newX}px`;
+  dslider.style.top = `${newY}px`;
+}
 
 
 
@@ -146,6 +202,7 @@ function draw() {
     // Request the next frame
     requestAnimationFrame(draw);
     updateFormula();
+    newOne();
 }
 
   // Start the rendering loop
@@ -163,3 +220,5 @@ function updateFormula() {
     var eqn = document.getElementById("equation");
     eqn.innerText = `W = z^${power} + (${real} + ${imagine}i)`;
 }
+
+
