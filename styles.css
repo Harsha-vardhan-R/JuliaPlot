@@ -69,17 +69,19 @@ canvas {
 }
 
 #c-real-slider {
-    width: 90%;
+    position: absolute;
+    width: 101%;
     height: 10px;
-    margin-bottom: 20px;
-    background-color: indianred;
+    bottom: -8%;
+    left: 0;
 }
 
 #c-imaginary-slider {
-    width: 90%;
+    position: absolute;
+    right: -58%;
+    top : 48%;
+    width: 101%;
     height: 10px;
-    margin-bottom: 20px;
-    color: indianred;
     rotate: -90deg;
 }
 
@@ -110,12 +112,13 @@ canvas {
 .vector-pad {
     position: relative;
     aspect-ratio: 1 / 1 ;
-    height: 35%;
-    background: radial-gradient(#ff0077 30%, rgb(255, 189, 65) 80%);
+    width: 70%;
+    background: radial-gradient(#ff57a6 35%, rgb(255, 227, 70) 80%);
     background-color: rgb(46, 46, 46);
     border: 1px solid white;
-    margin-left: 7%;
-    margin-bottom: 2%;
+    margin-left: 13%;
+    margin-right: 3%;
+    margin-bottom: 10%;
     border-radius: 7px;
     overflow: unset;
 }
@@ -139,6 +142,47 @@ canvas {
     cursor: grabbing;
 }
 
+#resolution {
+    height: 20px;
+    width: 140px;
+    margin-top: 0;
+    background-color: gray;
+    border: 1px solid white;
+    margin: 2%;
+}
+
+.one {
+    position: absolute;
+    font-size: smaller;
+    color: black;
+    top: 0;
+    left: 0;
+}
+
+.two {
+    position: absolute;
+    font-size: smaller;
+    color: black;
+    top: 0;
+    right: 0;
+}
+
+.three {
+    position: absolute;
+    font-size: smaller;
+    color: black;
+    bottom: 0;
+    left: 0;
+}
+
+.four {
+    position: absolute;
+    font-size: smaller;
+    color: black;
+    bottom: 0;
+    right: 0;
+}
+
 button {
     border: none;
     border-radius: 5px;
@@ -156,6 +200,7 @@ button:hover {
     background: linear-gradient(90deg, rgb(45, 255, 45), white,  rgb(90, 0, 143));
     transition: 400ms;
     font-size: larger;
+    font-weight: 300;
     box-shadow: 0 0 0 0;
 }
 

@@ -14,26 +14,42 @@
     <div class="adjustBox">
       <img src="juliaplotimg.png" alt="image" id="img"> 
 
-      <div id="equation" class="equation"> <b> W = z^2 + (0.0 + 0.0i) </b> </div>
+      <div id="equation" class="equation"> <b> W = z^2 + (0.0000 + 0.0000i) </b> </div>
       
       <label for="power-slider">Value of the power : </label>
       <input type="range" name="power-slider" value="0" id="power-slider" step="1" min="2" max="8" onchange="updateFormula()">
 
       <div id="vector-pad" class="vector-pad">
+
+        <font class="one">(-2.0, 2.0)</font>
+        <font class="two">(2.0, 2.0)</font>
+        <font class="three">(-2.0, -2.0)</font>
+        <font class="four">(2.0, -2.0)</font>
+
+
         <div id="horizontal-line"></div>
         <div id="vertical-line"></div>
         <div id="d-slider" class="d-slider"></div>
+        <label for="c-real-slider"></label>
+        <input type="range" name="c-real-slider" value="0" id="c-real-slider" step="0.0001" min="-2" max="2" onchange="updateFormula()">
+  
+        <label for="c-imaginary-slider"></label>
+        <input type="range" name="c-imaginary-slider" value="0" id="c-imaginary-slider" step="0.0001" min="-2" max="2" onchange="updateFormula()">
+  
       </div>
 
-      <label for="c-real-slider">Real part of the complex number : </label>
-      <input type="range" name="c-real-slider" value="0" id="c-real-slider" step="0.0001" min="-2" max="2" onchange="updateFormula()">
-
-      <label for="c-imaginary-slider">Imaginary part of the complex number : </label>
-      <input type="range" name="c-imaginary-slider" value="0" id="c-imaginary-slider" step="0.0001" min="-2" max="2" onchange="updateFormula()">
 
       <label for="iteration-slider" id="iterations">Maximum Number of Iterations : 255</label>
-      <input type="range" name="iteration-slider" value="0" id="iteration-slider" step="100" min="255" max="8191" onchange="updateIter()">
+      <input type="range" name="iteration-slider" value="0" id="iteration-slider" step="100" min="255" max="8191" onchange="updateIter()" onmousedown="newOne()">
 
+      <label for="resolution">Select Resolution :</label>
+      <select name="resolution" id="resolution">
+        <option value="1000">1000*1000</option>
+        <option value="2000">2000*2000</option>
+        <option value="3000">3000*3000</option>
+        <option value="4000">4000*4000</option>
+        <option value="5000">5000*5000</option>
+      </select>
       <button>Save Image</button>
 
       <div id="Time">Time taken for last render : 0</div>
@@ -48,15 +64,6 @@
           const power = document.getElementById("power-slider").value;
           const real = parseFloat(document.getElementById("c-real-slider").value);
           const imagine = parseFloat(document.getElementById("c-imaginary-slider").value);
-          
-          const dslider = document.getElementById("d-slider");
-          const containerRect = document.getElementById("vector-pad");
-          
-          const newX = containerRect.offsetWidth*((real+2.0)/4.24);
-          const newY = containerRect.offsetHeight*(1 - (imagine + 2.2) / 4.2);
-
-          dslider.style.left = `${newX}px`;
-          dslider.style.top = `${newY}px`;
 
           var eqn = document.getElementById("equation");
           eqn.innerText = `W = z${power} + (${real} + ${imagine}i)`;

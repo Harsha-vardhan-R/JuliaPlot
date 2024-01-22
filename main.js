@@ -1,3 +1,5 @@
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 
 const canvas = document.querySelector('canvas');
 const gl_object = canvas.getContext('webgl');
@@ -55,6 +57,7 @@ function handleSliderMove(e) {
 
         updateFormulaFromPad();
     }
+    sleep(100);
 }
 
 dslider.addEventListener( 'mousedown' , (e) => {
@@ -111,7 +114,7 @@ function newOne() {
   const real = parseFloat(document.getElementById("c-real-slider").value);
   const imagine = parseFloat(document.getElementById("c-imaginary-slider").value);
           
-  const newX = containerRect.offsetWidth*((real+2.0)/4.24);
+  const newX = containerRect.offsetWidth*((real+2.01)/4.22);
   const newY = containerRect.offsetHeight*(1 - (imagine + 2.2) / 4.2);
 
   dslider.style.left = `${newX}px`;
@@ -139,7 +142,10 @@ const vertexBuffer = gl_object.createBuffer();
 gl_object.bindBuffer(gl_object.ARRAY_BUFFER, vertexBuffer);
 gl_object.bufferData(gl_object.ARRAY_BUFFER, vertices, gl_object.STATIC_DRAW);
 
+
+// vertex shader does not have much stuff to do , we are just passing the ccoordinates to the fragment shader.
 const vertexShaderSource = `
+
   attribute vec2 coordinates;
   varying vec2 coords;
 
@@ -157,12 +163,38 @@ if (!gl_object.getShaderParameter(vertexShader, gl_object.COMPILE_STATUS)) {
 }
 
 
+// the fragment shader that caculates the color value for each pixel.
 const fragmentShaderSource = `
+
 precision mediump float;
+uniform vec2 resolution;
+uniform vec2 constant;
+uniform vec2 corner;
+uniform float range;
+uniform int max_iter;
 varying vec2 coords;
 
 void main(void) {
-  gl_FragColor = vec4(0.5, coords, 1.0);
+  vec2 z = (coords * range + corner);
+  vec2 c = constant;
+  vec2 newZ;
+  int num;
+  
+
+  for (int iterations = 0; iterations < 9000; iterations++) {
+
+    if (iterations >= max_iter) break;
+
+    if (dot(z, z) > 4.0) break;
+
+    newZ.x = z.x * z.x - z.y * z.y + c.x;
+    newZ.y = 2.0 * z.x * z.y + c.y;
+    z = newZ;
+    num = iterations;
+  }
+
+  float normalizedIterations = float(num) / float(max_iter);
+  gl_FragColor = vec4(vec3(normalizedIterations), 1.0);
 }`;
 
 const fragmentShader = gl_object.createShader(gl_object.FRAGMENT_SHADER);
@@ -185,6 +217,17 @@ const coord = gl_object.getAttribLocation(shaderProgram, 'coordinates');
 gl_object.vertexAttribPointer(coord, 2, gl_object.FLOAT, false, 0, 0);
 gl_object.enableVertexAttribArray(coord);
 
+// getting the locations at which each of the "need to be passed input" is present.
+const resolutionLocation = gl_object.getUniformLocation(shaderProgram, "resolution");
+const constantLocation = gl_object.getUniformLocation(shaderProgram, "constant");
+const cornerLocation = gl_object.getUniformLocation(shaderProgram, "corner");
+const rangeLocation = gl_object.getUniformLocation(shaderProgram, "range");
+const maxIterLocation = gl_object.getUniformLocation(shaderProgram, "max_iter");
+
+const iterations = document.getElementById("iteration-slider");
+const power = document.getElementById("power-slider");
+
+
 function draw() {
     // Clear the canvas
     gl_object.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -195,18 +238,36 @@ function draw() {
 
     gl_object.viewport(0, 0, canvas.width, canvas.height);
 
+    renderImage( -2.0, -2.0, 4.0, iterations.value, power, real_slider.value, imagine_slider.value);
+
 
     // Draw the square
     gl_object.drawArrays(gl_object.TRIANGLE_STRIP, 0, vertices.length / 2);
 
     // Request the next frame
-    requestAnimationFrame(draw);
+    
     updateFormula();
     newOne();
+    
+    requestAnimationFrame(draw);
 }
 
   // Start the rendering loop
 draw();
+
+
+function renderImage(coord_x, coord_y, range, max_iterations, power, c_real, c_imagine) {
+  // get the dimensions of the canvas.
+  const height = canvas.offsetHeight;
+  const width = canvas.offsetWidth;
+
+  gl_object.uniform2f(resolutionLocation, height, width);
+  gl_object.uniform2f(constantLocation, c_real, c_imagine);
+  gl_object.uniform2f(cornerLocation, coord_x, coord_y);
+  gl_object.uniform1f(rangeLocation, range);
+  gl_object.uniform1i(maxIterLocation, max_iterations);
+
+}
 
 
 
