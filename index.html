@@ -41,8 +41,14 @@
       <label for="hue-slider" id="hue">Hue : </label>
       <input type="range" name="hue-slider" value="0" id="hue-slider" step="0.01" min="0.0" max="1.0" >
 
+      <label for="smooth-min-slider" id="smoothstepmin">SmoothStepValuesMin(shader) : </label>
+      <input type="range" name="smooth-min-slider" value="0.0" id="smooth-min-slider" step="0.01" min="0.0" max="1.0" >
+
+      <label for="smooth-max-slider" id="smoothstepmax">SmoothStepValuesMax(shader) : </label>
+      <input type="range" name="smooth-max-slider" value="1.0" id="smooth-max-slider" step="0.01" min="0.0" max="1.0" >
+
       <label for="iteration-slider" id="iterations">Maximum Number of Iterations : 32</label>
-      <input type="range" name="iteration-slider" value="0" id="iteration-slider" step="10" min="32" max="2500" onchange="updateIter()" onmousedown="newOne()">
+      <input type="range" name="iteration-slider" value="0" id="iteration-slider" step="10" min="32" max="1200" onchange="updateIter()" onmousedown="newOne()">
 
 
       <button id="downloadButton">Save Image</button>

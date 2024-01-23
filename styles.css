@@ -124,6 +124,18 @@ canvas:active {
     margin-bottom: 20px;
 }
 
+#smooth-min-slider {
+    width: 90%;
+    height: 10px;
+    margin-bottom: 20px;
+}
+
+#smooth-max-slider {
+    width: 90%;
+    height: 10px;
+    margin-bottom: 20px;
+}
+
 .vector-pad {
     position: relative;
     aspect-ratio: 1 / 1 ;

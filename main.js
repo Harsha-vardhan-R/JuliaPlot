@@ -198,20 +198,16 @@ if (!gl_object.getShaderParameter(vertexShader, gl_object.COMPILE_STATUS)) {
 // the fragment shader that caculates the color value for each pixel.
 const fragmentShaderSource = `
 precision mediump float;
-uniform vec2 resolution;
 uniform vec2 constant;
 uniform vec2 corner;
 uniform float range;
 uniform int max_iter;
 uniform int power;
 uniform float hue;
+uniform vec2 smooth;
 varying vec2 coords;
 
 float value = 1.0;
-
-float trapCircle(vec2 point, vec2 center, float radius) {
-    return length(point - center) - radius;
-}
 
 vec3 hsv2rgb(vec3 c) {
   vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -239,22 +235,20 @@ void main(void) {
       }
 
       num = iterations;
-    } 
-
-    float trapDistance = trapCircle(z, vec2(0.0), 0.1);
+    }
 
     float normalizedIterations = float(num) / float(max_iter);
 
-    if ((num+15) >= max_iter ) {
+    if ((num+10) >= max_iter ) {
       value = 0.0;
     }
-    
-    vec3 color = hsv2rgb(vec3(normalizedIterations+hue, 1.0-(normalizedIterations/2.0), value)) * smoothstep(0.0, 0.02, trapDistance);
 
-    
+    vec3 color = hsv2rgb(vec3(smoothstep(smooth.x, smooth.y, normalizedIterations)+hue, 
+      smoothstep(0.0, 0.1, normalizedIterations), 
+      value));
+
     gl_FragColor = vec4(color, 1.0);
-}
-`;
+}`;
 
 const fragmentShader = gl_object.createShader(gl_object.FRAGMENT_SHADER);
 gl_object.shaderSource(fragmentShader, fragmentShaderSource);
@@ -264,12 +258,13 @@ if (!gl_object.getShaderParameter(fragmentShader, gl_object.COMPILE_STATUS)) {
 console.error('ERROR compiling fragment shader!', gl_object.getShaderInfoLog(fragmentShader));
 }
 
+//////////////////////////
 const shaderProgram = gl_object.createProgram();
 gl_object.attachShader(shaderProgram, vertexShader);
 gl_object.attachShader(shaderProgram, fragmentShader);
 gl_object.linkProgram(shaderProgram);
 gl_object.useProgram(shaderProgram);
-
+//////////////////////////
 
 // we want the location of the coordinates.
 const coord = gl_object.getAttribLocation(shaderProgram, 'coordinates');
@@ -284,17 +279,23 @@ const rangeLocation = gl_object.getUniformLocation(shaderProgram, "range");
 const maxIterLocation = gl_object.getUniformLocation(shaderProgram, "max_iter");
 const powerLocation = gl_object.getUniformLocation(shaderProgram, "power");
 const hueLocation = gl_object.getUniformLocation(shaderProgram, "hue");
+const smoothLocation = gl_object.getUniformLocation(shaderProgram, "smooth");
+
 
 const iterations = document.getElementById("iteration-slider");
 const power = document.getElementById("power-slider");
 const timetime = document.getElementById("timetime");
 const hue = document.getElementById("hue-slider");
+const smooth_min_div = document.getElementById("smooth-min-slider");
+const smooth_max_div = document.getElementById("smooth-max-slider");
 
 var start_time;
 
 var capture = false;
 
 // main drawing loop.
+// extremely dumb loop, need to improve will keep on drawing without thinking, even though if it needs to draw the same thing.
+// literally eats the gpu alive.
 function draw() {
     start_time = performance.now();
 
@@ -307,7 +308,14 @@ function draw() {
 
     gl_object.viewport(0, 0, canvas.width, canvas.height);
 
-    renderImage( init_center_x, init_center_y, init_range, iterations.value, power.value, real_slider.value, imagine_slider.value, hue.value);
+    renderImage(  init_center_x, init_center_y, 
+                  init_range, 
+                  iterations.value, 
+                  power.value, 
+                  real_slider.value, imagine_slider.value, 
+                  hue.value, 
+                  smooth_min_div.value, smooth_max_div.value
+    );
 
 
     // two triangles!!
@@ -334,7 +342,7 @@ function draw() {
 draw();
 
 // for setting of the image to render.
-function renderImage(coord_x, coord_y, range, max_iterations, power, c_real, c_imagine, hue) {
+function renderImage(coord_x, coord_y, range, max_iterations, power, c_real, c_imagine, hue, smooth_min, smooth_max) {
   // get the dimensions of the canvas.
   const height = canvas.offsetHeight;
   const width = canvas.offsetWidth;
@@ -346,6 +354,7 @@ function renderImage(coord_x, coord_y, range, max_iterations, power, c_real, c_i
   gl_object.uniform1i(maxIterLocation, max_iterations);
   gl_object.uniform1i(powerLocation, power);
   gl_object.uniform1f(hueLocation, hue);
+  gl_object.uniform2f(smoothLocation, smooth_min, smooth_max);
 
 }
 
