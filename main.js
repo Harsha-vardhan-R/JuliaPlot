@@ -358,8 +358,6 @@ function renderImage(coord_x, coord_y, range, max_iterations, power, c_real, c_i
 
 }
 
-
-
 // for updating the equation based on the present slider values
 // also need to render again
 function updateFormula() {
